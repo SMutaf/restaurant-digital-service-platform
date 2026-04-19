@@ -1,0 +1,30 @@
+# Maven
+target/
+.mvn/repository/
+.mvn/wrapper/dists/
+
+# IDE
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Env and local overrides
+.env
+application-local.yml
+src/main/resources/application-local.yml
+
+# Runtime files
+tmp/
+temp/
+*.pid
