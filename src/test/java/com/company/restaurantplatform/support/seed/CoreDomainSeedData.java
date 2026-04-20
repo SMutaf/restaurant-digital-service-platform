@@ -1,0 +1,51 @@
+package com.company.restaurantplatform.support.seed;
+
+import com.company.restaurantplatform.core.domain.entity.CustomerSession;
+import com.company.restaurantplatform.core.domain.entity.MenuCategory;
+import com.company.restaurantplatform.core.domain.entity.Order;
+import com.company.restaurantplatform.core.domain.entity.OrderItem;
+import com.company.restaurantplatform.core.domain.entity.PlaybackQueue;
+import com.company.restaurantplatform.core.domain.entity.PlaybackQueueItem;
+import com.company.restaurantplatform.core.domain.entity.PlaybackSession;
+import com.company.restaurantplatform.core.domain.entity.Playlist;
+import com.company.restaurantplatform.core.domain.entity.PlaylistSong;
+import com.company.restaurantplatform.core.domain.entity.Product;
+import com.company.restaurantplatform.core.domain.entity.Restaurant;
+import com.company.restaurantplatform.core.domain.entity.RestaurantTable;
+import com.company.restaurantplatform.core.domain.entity.RestaurantUser;
+import com.company.restaurantplatform.core.domain.entity.RestaurantUserRole;
+import com.company.restaurantplatform.core.domain.entity.Role;
+import com.company.restaurantplatform.core.domain.entity.Song;
+import com.company.restaurantplatform.core.domain.entity.TableQrCode;
+import com.company.restaurantplatform.core.domain.entity.User;
+import com.company.restaurantplatform.core.domain.entity.Vote;
+import com.company.restaurantplatform.core.domain.entity.VotingRound;
+import com.company.restaurantplatform.core.domain.entity.VotingRoundCandidateSong;
+
+public record CoreDomainSeedData(
+        User user,
+        Role role,
+        Restaurant restaurant,
+        RestaurantUser restaurantUser,
+        RestaurantUserRole restaurantUserRole,
+        RestaurantTable restaurantTable,
+        TableQrCode tableQrCode,
+        MenuCategory menuCategory,
+        Product product,
+        Order order,
+        OrderItem orderItem,
+        Song songOne,
+        Song songTwo,
+        Playlist playlist,
+        PlaylistSong playlistSongOne,
+        PlaylistSong playlistSongTwo,
+        PlaybackQueue playbackQueue,
+        PlaybackQueueItem playbackQueueItem,
+        PlaybackSession playbackSession,
+        VotingRound votingRound,
+        VotingRoundCandidateSong candidateSongOne,
+        VotingRoundCandidateSong candidateSongTwo,
+        CustomerSession customerSession,
+        Vote vote
+) {
+}

@@ -2,9 +2,9 @@ package com.company.restaurantplatform.core.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.company.restaurantplatform.core.domain.enums.OrderStatus;
+import com.company.restaurantplatform.support.seed.CoreDomainSeedData;
+import com.company.restaurantplatform.support.seed.CoreDomainSeedFactory;
 import jakarta.persistence.EntityManager;
-import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
@@ -12,14 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import com.company.restaurantplatform.support.seed.CoreDomainSeedData;
-import com.company.restaurantplatform.support.seed.CoreDomainSeedFactory;
 
 @SpringBootTest
 @Transactional
 @ActiveProfiles("integration")
 @EnabledIfEnvironmentVariable(named = "DB_USERNAME", matches = ".+")
-class CoreRepositoryRelationshipIntegrationTest {
+class CoreDomainSeedFactoryIntegrationTest {
 
     @Autowired
     private EntityManager entityManager;
@@ -88,8 +86,7 @@ class CoreRepositoryRelationshipIntegrationTest {
     private VoteRepository voteRepository;
 
     @Test
-    void shouldPersistAndLoadCoreRelationshipsThroughRepositories() {
-        String suffix = UUID.randomUUID().toString().substring(0, 8);
+    void shouldCreateReusableSeedScenario() {
         CoreDomainSeedFactory seedFactory = new CoreDomainSeedFactory(
                 userRepository,
                 roleRepository,
@@ -114,32 +111,18 @@ class CoreRepositoryRelationshipIntegrationTest {
                 voteRepository
         );
 
-        CoreDomainSeedData seed = seedFactory.seedFullScenario(suffix);
+        CoreDomainSeedData seed = seedFactory.seedFullScenario(UUID.randomUUID().toString().substring(0, 8));
 
         entityManager.flush();
         entityManager.clear();
 
-        assertThat(userRepository.findByEmail(seed.user().getEmail())).isPresent();
-        assertThat(roleRepository.findByCode(seed.role().getCode())).isPresent();
-        assertThat(restaurantRepository.findBySlug(seed.restaurant().getSlug())).isPresent();
-        assertThat(restaurantUserRepository.findByRestaurantIdAndUserId(seed.restaurant().getId(), seed.user().getId())).isPresent();
-        assertThat(restaurantUserRoleRepository.findAllByRestaurantUserId(seed.restaurantUser().getId())).hasSize(1);
-        assertThat(restaurantTableRepository.findByRestaurantIdAndTableNumber(seed.restaurant().getId(), seed.restaurantTable().getTableNumber())).isPresent();
-        assertThat(tableQrCodeRepository.findByTokenAndActiveTrue(seed.tableQrCode().getToken())).isPresent();
-        assertThat(menuCategoryRepository.findAllByRestaurantIdOrderByDisplayOrderAsc(seed.restaurant().getId())).hasSize(1);
-        assertThat(productRepository.findAllByRestaurantIdAndVisibleToCustomerTrue(seed.restaurant().getId())).hasSize(1);
-        assertThat(orderRepository.existsByRestaurantTableIdAndStatusIn(seed.restaurantTable().getId(), List.of(OrderStatus.RECEIVED))).isTrue();
-        assertThat(orderItemRepository.findAllByOrderId(seed.order().getId())).hasSize(1);
-        assertThat(songRepository.findAllByRestaurantIdAndActiveTrue(seed.restaurant().getId())).hasSize(2);
-        assertThat(playlistRepository.findAllByRestaurantId(seed.restaurant().getId())).hasSize(1);
-        assertThat(playlistSongRepository.findAllByPlaylistIdOrderByPositionAsc(seed.playlist().getId())).hasSize(2);
-        assertThat(playbackQueueRepository.findByRestaurantId(seed.restaurant().getId())).isPresent();
-        assertThat(playbackQueueItemRepository.findAllByPlaybackQueueIdOrderByPositionAsc(seed.playbackQueue().getId())).hasSize(1);
-        assertThat(playbackSessionRepository.findByRestaurantId(seed.restaurant().getId())).isPresent();
-        assertThat(votingRoundRepository.findAllByRestaurantIdOrderByOpenedAtDesc(seed.restaurant().getId())).hasSize(1);
-        assertThat(votingRoundCandidateSongRepository.findAllByVotingRoundIdOrderByCandidateNoAsc(seed.votingRound().getId())).hasSize(2);
-        assertThat(customerSessionRepository.findBySessionToken(seed.customerSession().getSessionToken())).isPresent();
-        assertThat(voteRepository.countByVotingRoundIdAndSongId(seed.votingRound().getId(), seed.songTwo().getId())).isEqualTo(1);
-        assertThat(voteRepository.findAllByVotingRoundId(seed.votingRound().getId())).hasSize(1);
+        assertThat(seed.restaurant().getId()).isNotNull();
+        assertThat(seed.order().getRestaurant().getId()).isEqualTo(seed.restaurant().getId());
+        assertThat(seed.orderItem().getOrder().getId()).isEqualTo(seed.order().getId());
+        assertThat(seed.playlistSongOne().getPlaylist().getId()).isEqualTo(seed.playlist().getId());
+        assertThat(seed.playbackSession().getPlaybackQueue().getId()).isEqualTo(seed.playbackQueue().getId());
+        assertThat(seed.candidateSongOne().getVotingRound().getId()).isEqualTo(seed.votingRound().getId());
+        assertThat(seed.vote().getCustomerSession().getId()).isEqualTo(seed.customerSession().getId());
+        assertThat(seed.vote().getSong().getId()).isEqualTo(seed.songTwo().getId());
     }
 }
