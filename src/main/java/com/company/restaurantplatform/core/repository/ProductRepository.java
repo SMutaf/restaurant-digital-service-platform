@@ -2,9 +2,16 @@ package com.company.restaurantplatform.core.repository;
 
 import com.company.restaurantplatform.core.domain.entity.Product;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findAllByRestaurantIdAndVisibleToCustomerTrue(Long restaurantId);
+
+    List<Product> findAllByRestaurantIdOrderByNameAsc(Long restaurantId);
+
+    Optional<Product> findByIdAndRestaurantId(Long productId, Long restaurantId);
+
+    List<Product> findAllByRestaurantIdAndActiveTrueAndVisibleToCustomerTrueOrderByNameAsc(Long restaurantId);
 }
