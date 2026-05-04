@@ -9,4 +9,6 @@ public interface VoteRepository extends JpaRepository<Vote, Long> {
     long countByVotingRoundIdAndSongId(Long votingRoundId, Long songId);
 
     List<Vote> findAllByVotingRoundId(Long votingRoundId);
+
+    boolean existsByCustomerSessionIdAndVotingRoundId(Long customerSessionId, Long votingRoundId);
 }
