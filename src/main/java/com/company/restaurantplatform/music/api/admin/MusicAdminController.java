@@ -8,11 +8,14 @@ import com.company.restaurantplatform.music.api.dto.SongResponse;
 import com.company.restaurantplatform.music.api.dto.UpdateSongRequest;
 import com.company.restaurantplatform.music.application.MusicCatalogAdminService;
 import com.company.restaurantplatform.music.mapper.MusicMapper;
+import com.company.restaurantplatform.shared.security.AuthenticatedUser;
+import com.company.restaurantplatform.shared.security.RestaurantAccessGuard;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,15 +32,25 @@ import org.springframework.web.bind.annotation.RestController;
 public class MusicAdminController {
 
     private final MusicCatalogAdminService musicCatalogAdminService;
+    private final RestaurantAccessGuard restaurantAccessGuard;
 
     @PostMapping("/songs")
     @ResponseStatus(HttpStatus.CREATED)
-    public SongResponse createSong(@PathVariable Long restaurantId, @Valid @RequestBody CreateSongRequest request) {
+    public SongResponse createSong(
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+            @PathVariable Long restaurantId,
+            @Valid @RequestBody CreateSongRequest request
+    ) {
+        restaurantAccessGuard.requireMusicAccess(authenticatedUser.userId(), restaurantId);
         return MusicMapper.toSongResponse(musicCatalogAdminService.createSong(restaurantId, request));
     }
 
     @GetMapping("/songs")
-    public List<SongResponse> listSongs(@PathVariable Long restaurantId) {
+    public List<SongResponse> listSongs(
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+            @PathVariable Long restaurantId
+    ) {
+        restaurantAccessGuard.requireMusicAccess(authenticatedUser.userId(), restaurantId);
         return musicCatalogAdminService.listSongs(restaurantId)
                 .stream()
                 .map(MusicMapper::toSongResponse)
@@ -46,25 +59,33 @@ public class MusicAdminController {
 
     @PutMapping("/songs/{songId}")
     public SongResponse updateSong(
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
             @PathVariable Long restaurantId,
             @PathVariable Long songId,
             @Valid @RequestBody UpdateSongRequest request
     ) {
+        restaurantAccessGuard.requireMusicAccess(authenticatedUser.userId(), restaurantId);
         return MusicMapper.toSongResponse(musicCatalogAdminService.updateSong(restaurantId, songId, request));
     }
 
     @PostMapping("/playlists")
     @ResponseStatus(HttpStatus.CREATED)
     public PlaylistResponse createPlaylist(
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
             @PathVariable Long restaurantId,
             @Valid @RequestBody CreatePlaylistRequest request
     ) {
+        restaurantAccessGuard.requireMusicAccess(authenticatedUser.userId(), restaurantId);
         var playlist = musicCatalogAdminService.createPlaylist(restaurantId, request);
         return MusicMapper.toPlaylistResponse(playlist, musicCatalogAdminService.listPlaylistSongs(restaurantId, playlist.getId()));
     }
 
     @GetMapping("/playlists")
-    public List<PlaylistResponse> listPlaylists(@PathVariable Long restaurantId) {
+    public List<PlaylistResponse> listPlaylists(
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+            @PathVariable Long restaurantId
+    ) {
+        restaurantAccessGuard.requireMusicAccess(authenticatedUser.userId(), restaurantId);
         return musicCatalogAdminService.listPlaylists(restaurantId)
                 .stream()
                 .map(playlist -> MusicMapper.toPlaylistResponse(
@@ -77,17 +98,24 @@ public class MusicAdminController {
     @PostMapping("/playlists/{playlistId}/songs")
     @ResponseStatus(HttpStatus.CREATED)
     public PlaylistResponse addSongToPlaylist(
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
             @PathVariable Long restaurantId,
             @PathVariable Long playlistId,
             @Valid @RequestBody AddPlaylistSongRequest request
     ) {
+        restaurantAccessGuard.requireMusicAccess(authenticatedUser.userId(), restaurantId);
         musicCatalogAdminService.addSongToPlaylist(restaurantId, playlistId, request);
         var playlist = musicCatalogAdminService.getPlaylist(restaurantId, playlistId);
         return MusicMapper.toPlaylistResponse(playlist, musicCatalogAdminService.listPlaylistSongs(restaurantId, playlistId));
     }
 
     @GetMapping("/playlists/{playlistId}")
-    public PlaylistResponse getPlaylist(@PathVariable Long restaurantId, @PathVariable Long playlistId) {
+    public PlaylistResponse getPlaylist(
+            @AuthenticationPrincipal AuthenticatedUser authenticatedUser,
+            @PathVariable Long restaurantId,
+            @PathVariable Long playlistId
+    ) {
+        restaurantAccessGuard.requireMusicAccess(authenticatedUser.userId(), restaurantId);
         var playlist = musicCatalogAdminService.getPlaylist(restaurantId, playlistId);
         return MusicMapper.toPlaylistResponse(playlist, musicCatalogAdminService.listPlaylistSongs(restaurantId, playlistId));
     }
